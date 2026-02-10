@@ -1,0 +1,32 @@
+/* Logo Styling */
+.header-logo-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.site-logo {
+    height: 60px;
+    /* Reduced height to fit header better */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+    /* Add subtle depth */
+    transition: transform 0.3s ease;
+}
+
+.site-logo:hover {
+    transform: scale(1.05);
+    /* Gentle hover effect */
+}
+
+/* Ensure header background blends with logo if needed */
+header {
+    background: transparent !important;
+    /* Let body gradient show through or keep existing style */
+    box-shadow: none !important;
+    /* Remove default shadow for cleaner look with logo */
+    padding-bottom: 0 !important;
+}

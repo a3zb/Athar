@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>أثـر | Athar</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#380056">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="logo_styles.css">
+    <link rel="stylesheet" href="athar_pro.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto_Naskh_Arabic:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Uthmanic';
+            src: url('https://fonts.gstatic.com/s/amiri/v26/J7afp9dbcD7yc6rCx6QP.woff2');
+            /* Fallback link, or real font path */
+        }
+    </style>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered'))
+                    .catch(err => console.log('Service Worker Registration Failed', err));
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="video-background-container">
+        <video id="backgroundVideo" autoplay loop muted playsinline>
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-nav">
+        <div class="logo">أثـر | Athar</div>
+    </div>
+
+    <!-- Side Menu / Drawer -->
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-content">
+            <button id="closeMenuBtn" class="close-menu">&times;</button>
+            <div class="menu-header">
+                <img src="favicon.png" alt="Logo" class="menu-logo">
+                <h3>القائمة الرئيسية</h3>
+            </div>
+
+
+
+            <nav class="menu-nav">
+                <a href="#" id="navHome" class="menu-item active"><i class="fas fa-home"></i> <span>الرئيسية
+                        (الاستماع)</span></a>
+                <a href="#" id="navReading" class="menu-item"><i class="fas fa-book-open"></i> <span>الورد اليومي
+                        (قراءة)</span></a>
+                <a href="#" id="navFavorites" class="menu-item"><i class="far fa-heart"></i> <span>المفضلة</span></a>
+                <a href="#" id="navAdhkar" class="menu-item"><i class="fas fa-hands-praying"></i>
+                    <span>الأذكار</span></a>
+                <a href="#" id="navHadith" class="menu-item"><i class="fas fa-quote-right"></i> <span>الأحاديث
+                        النبوية</span></a>
+                <a href="#" id="navPrayer" class="menu-item"><i class="fas fa-clock"></i> <span>مواقيت الصلاة</span></a>
+
+                <a href="#" id="navSettings" class="menu-item"><i class="fas fa-cog"></i> <span>الإعدادات</span></a>
+
+                <div class="menu-divider" style="height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0;"></div>
+
+                <!-- Background Sync Manager -->
+                <div class="sync-manager-sidebar" style="padding: 10px 15px;">
+                    <button id="startMasterSyncBtn" class="sync-start-btn" onclick="startMasterOfflineSync()"
+                        style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(168,85,247,0.3); background: rgba(168,85,247,0.1); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.9rem; transition: 0.3s;">
+                        <i class="fas fa-cloud-arrow-down"></i>
+                        <span>تحميل المصحف أوفلاين</span>
+                    </button>
+                    <div id="masterSyncProgressWrapper" style="display: none; margin-top: 10px;">
+                        <div class="sync-progress-bar-bg"
+                            style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div id="masterSyncProgressBar"
+                                style="width: 0%; height: 100%; background: linear-gradient(90deg, #a855f7, #ec4899); transition: width 0.3s;">
+                            </div>
+                        </div>
+                        <p id="masterSyncStatus"
+                            style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 5px; text-align: center;">
+                            جاري التجهيز...</p>
+                    </div>
+                </div>
+            </nav>
+            <div class="menu-footer">
+                <p>اللهم اجعل القرآن ربيع قلوبنا</p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+    <div id="homePage" class="page active">
+        <header>
+            <div class="header-logo-container">
+                <img src="logo.png" alt="أثـر - Athar" class="site-logo">
+            </div>
+
+
+        </header>
+        <main>
+            <!-- Verse of the Day Card -->
+            <div id="dailyVerseContainer" class="daily-verse-card" style="display: none;">
+                <div class="daily-verse-header">
+                    <i class="fas fa-star-and-crescent"></i>
+                    <span>آية اليوم</span>
+                    <span id="dailyDateHijri" class="hijri-badge">---</span>
+                </div>
+                <div class="daily-verse-content">
+                    <p id="dailyVerseText">...</p>
+                    <span id="dailyVerseSource">...</span>
+                </div>
+                <div class="daily-verse-actions-bar">
+                    <button class="action-btn" id="playDailyVerseBtn" title="استماع للآية"><i
+                            class="fas fa-play"></i></button>
+                    <button class="action-btn" id="tafsirDailyVerseBtn" title="تفسير الآية"><i
+                            class="fas fa-book-open"></i></button>
+                    <button class="action-btn" id="copyDailyVerseBtn" title="نسخ"><i class="fas fa-copy"></i></button>
+                    <button class="action-btn" onclick="AtharPro.showShareCard()"
+                        style="background:rgba(251,191,36,0.2); color:#fbbf24;" title="مشاركة">
+                        <i class="fas fa-share-nodes"></i>
+                    </button>
+                </div>
+            </div>
+
+
+
+            <div class="search-container">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="ابحث عن سورة، قارئ، أو آية...">
+                    <button id="searchBtn" class="search-btn" title="بحث"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-options">
+                    <label class="search-option">
+                        <input type="radio" name="searchType" value="all" checked>
+                        <span>الكل</span>
+                    </label>
+                    <label class="search-option">
+                        <input type="radio" name="searchType" value="surah">
+                        <span>السورة</span>
+                    </label>
+                    <label class="search-option">
+                        <input type="radio" name="searchType" value="reader">
+                        <span>القارئ</span>
+                    </label>
+                    <label class="search-option">
+                        <input type="radio" name="searchType" value="verse">
+                        <span>الآية</span>
+                    </label>
+                </div>
+                <div class="search-options" id="playStartOptions" style="display: none;">
+                    <span class="search-options-label">بداية التشغيل:</span>
+                    <label class="search-option">
+                        <input type="radio" name="playStart" value="verse" checked>
+                        <span>من الآية</span>
+                    </label>
+                    <label class="search-option">
+                        <input type="radio" name="playStart" value="beginning">
+                        <span>بداية السورة</span>
+                    </label>
+                </div>
+            </div>
+            <div id="resumePrompt" class="resume-prompt" style="display: none;">
+                <div class="resume-content">
+                    <p id="resumeText">هل تريد الاستمرار من حيث توقفت؟</p>
+                    <div class="resume-btns">
+                        <button id="resumeYesBtn" class="resume-btn yes">نعم</button>
+                        <button id="resumeNoBtn" class="resume-btn no">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+            <ul id="songList" class="song-list">
+                <li class="loading-songs">جاري تحميل أثـر...</li>
+            </ul>
+        </main>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settingsPage" class="page">
+        <header>
+            <div class="header-content">
+                <button id="backToHomeFromSettingsBtn" class="back-btn"><i class="fas fa-arrow-right"></i></button>
+                <h1>الإعدادات</h1>
+            </div>
+        </header>
+
+        <div class="settings-container">
+
+
+            <div class="settings-group">
+                <h3>المساعد الذكي</h3>
+                <div class="setting-item">
+                    <span>تفعيل المساعد الذكي</span>
+                    <label class="switch">
+                        <input type="checkbox" id="aiToggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <p style="font-size:0.8rem; color:#ccc; margin-top:5px;">يقدم اقتراحات ذكية بناءً على الوقت ونشاطك.</p>
+            </div>
+
+            <div class="settings-group">
+                <h3>إحصائيات الأثر</h3>
+                <div class="stats-dashboard-card">
+                    <div id="statsCircles" class="stats-circles-grid">
+                        <!-- Populated by AtharPro -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>المساحة والتخزين</h3>
+                <div class="storage-info-item">
+                    <div class="storage-bar-bg">
+                        <div id="storageBarFill" class="storage-bar-fill"></div>
+                    </div>
+                    <span id="storageStatsText">جاري الحساب...</span>
+                </div>
+                <div id="offlineManagerList" class="downloaded-surahs-list">
+                    <!-- Populated by JS -->
+                </div>
+                <p style="font-size:0.75rem; color:#aaa;">يمكنك مسح السور المحملة لتوفير مساحة في الذاكرة.</p>
+            </div>
+
+            <div class="settings-group">
+                <h3>حول التطبيق</h3>
+                <button id="btnShowHowTo" class="settings-btn">
+                    <i class="fas fa-question-circle"></i>
+                    <span>كيفية استخدام الموقع</span>
+                </button>
+                <button id="btnShowContact" class="settings-btn">
+                    <i class="fas fa-envelope"></i>
+                    <span>تواصل معنا</span>
+                </button>
+            </div>
+
+            <div class="settings-group" style="text-align: center;">
+                <h3>تطبيق أثـر | Athar</h3>
+                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 5px;">إصدار 2.0 - جميع الحقوق محفوظة</p>
+                <p style="color: #a855f7; font-weight: bold; margin-bottom: 15px;">لا تنسونا من صالح دعائكم</p>
+                <p style="opacity: 0.6; font-size: 0.8rem; line-height: 1.5;">أي شخص يملك فكرة لتطوير الموقع يتواصل معنا
+                    عبر إحدى منصاتنا</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="songDetailPage" class="page">
+        <button id="backToHomeFromDetailBtn" class="back-btn"><i class="fas fa-arrow-right"></i> عودة</button>
+        <div class="song-detail-container">
+            <div class="song-detail-header">
+                <img id="detailAlbumArt" src="https://placehold.co/200x200/3a3a4e/e0e0e0?text=Art" alt="Album Art"
+                    class="detail-album-art">
+                <div class="detail-info">
+                    <h2 id="detailTrackTitle">عنوان السورة</h2>
+                    <p id="detailTrackArtist">اسم القارئ</p>
+                    <p id="detailTrackSecondArtist" class="second-artist"></p>
+                    <p id="detailAlbumName">اسم المصدر</p>
+                </div>
+            </div>
+            <div class="detail-controls">
+                <button id="playFromDetailBtn" class="play-from-detail-btn"><i class="fas fa-play-circle"></i>
+                    تشغيل</button>
+                <div class="detail-input-container">
+                    <i class="fas fa-microphone"></i>
+                    <input type="range" id="detailVolumeSlider" class="detail-volume-slider" min="0" max="100" step="1"
+                        value="50">
+                    <span id="detailVolumeValue">50</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="playerPage" class="page">
+        <header>
+            <div class="header-content">
+                <button id="backToHomeBtn" class="back-btn"><i class="fas fa-arrow-right"></i></button>
+                <h1>المشغل</h1>
+            </div>
+        </header>
+
+        <div class="music-player-container">
+            <div class="music-player-box">
+                <div class="player-header">
+                    <img id="albumArt" src="https://placehold.co/100x100/3a3a4e/e0e0e0?text=Art" alt="Album Art"
+                        class="album-art-player">
+                    <div class="track-info-player">
+                        <h2 id="playerTrackTitle">اسم السورة</h2>
+                        <p id="playerTrackArtist">اسم القارئ</p>
+                        <p id="playerTrackSecondArtist" class="second-artist"></p>
+                    </div>
+                </div>
+
+                <div class="player-lyrics-header">
+                    <h3>كلمات السورة</h3>
+                    <div class="lyrics-font-controls">
+                        <button id="decreaseLyricsFont" title="تصغير الخط"><i class="fas fa-minus"></i></button>
+                        <span id="lyricsFontSizeValue">100%</span>
+                        <button id="increaseLyricsFont" title="تكبير الخط"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div id="lyricsContainer" class="lyrics-container">
+                    <p>الآيات تظهر هنا عند التشغيل...</p>
+                </div>
+
+
+                <div class="player-controls">
+                    <div class="progress-section-player">
+                        <div id="playerProgressBarContainer" class="progress-bar-container-player">
+                            <div id="playerProgressBar" class="progress-bar-player"></div>
+                        </div>
+                        <div class="time-display-player">
+                            <span id="playerCurrentTime">0:00</span>
+                            <span id="playerTotalDuration">0:00</span>
+                        </div>
+                    </div>
+
+                    <div class="main-controls-player">
+
+                        <button id="playerPrevBtn" class="control-btn-player" title="السابق"><i
+                                class="fas fa-backward-step"></i></button>
+                        <button id="playerSkipBackBtn" class="control-btn-player small-icon skip-btn"
+                            title="رجوع 10 ثواني"><i class="fas fa-rotate-left"></i><span>10</span></button>
+                        <button id="playerPlayPauseBtn" class="control-btn-player play-pause-player"
+                            title="تشغيل/إيقاف"><i class="fas fa-play"></i></button>
+                        <button id="playerSkipForwardBtn" class="control-btn-player small-icon skip-btn"
+                            title="تقديم 10 ثواني"><i class="fas fa-rotate-right"></i><span>10</span></button>
+                        <button id="playerNextBtn" class="control-btn-player" title="التالي"><i
+                                class="fas fa-forward-step"></i></button>
+
+                        <button id="playerRepeatBtn" class="control-btn-player secondary" title="تكرار"><i
+                                class="fas fa-repeat"></i></button>
+                    </div>
+
+                    <div class="secondary-controls-player">
+                        <div class="volume-control-player">
+                            <button id="volumeBtn" class="control-btn-player small-icon" title="الصوت"><i
+                                    class="fas fa-volume-up"></i></button>
+                            <div id="volumePopover" class="volume-popover">
+                                <button id="volPlusBtn" class="vol-adj-btn"><i class="fas fa-plus"></i></button>
+                                <div class="vol-indicator-track">
+                                    <div id="volIndicatorFill" class="vol-indicator-fill" style="height: 80%;"></div>
+                                </div>
+                                <button id="volMinusBtn" class="vol-adj-btn"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="sleep-control-player">
+                            <button id="sleepTimerBtn" class="control-btn-player small-icon" title="مؤقّت إيقاف"><i
+                                    class="fas fa-moon"></i></button>
+                            <div id="sleepTimerPopover" class="sleep-popover">
+                                <div class="sleep-title">إيقاف بعد:</div>
+                                <div class="sleep-grid">
+                                    <button class="sleep-option" data-min="5">5 دقائق</button>
+                                    <button class="sleep-option" data-min="10">10 دقائق</button>
+                                    <button class="sleep-option" data-min="20">20 دقيقة</button>
+                                </div>
+                                <div class="sleep-custom">
+                                    <input id="sleepCustomMinutes" type="number" min="1" max="600"
+                                        placeholder="دقائق مخصّصة" aria-label="عدد الدقائق">
+                                    <button id="sleepStartCustomBtn" class="sleep-option">بدء</button>
+                                </div>
+                                <button id="sleepCancelBtn" class="sleep-cancel" disabled>إلغاء المؤقّت</button>
+                                <div id="sleepRemaining" class="sleep-remaining" style="display:none;"></div>
+                            </div>
+                        </div>
+                        <button id="favoriteSurahBtn" class="control-btn-player small-icon" title="سورة مفضلة"><i
+                                class="far fa-heart"></i></button>
+                        <button id="addBookmarkBtn" class="control-btn-player small-icon" title="إضافة إشارة"><i
+                                class="fas fa-bookmark"></i></button>
+                        <button id="toggleBookmarksBtn" class="control-btn-player small-icon" title="إشاراتي"><i
+                                class="fas fa-list"></i></button>
+                        <button id="downloadSurahBtn" class="control-btn-player small-icon"
+                            title="تحميل للاستماع بدون إنترنت">
+                            <i class="fas fa-cloud-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Bookmarks panel -->
+                <div id="bookmarksPanel" class="bookmarks-panel" style="display:none;">
+                    <div class="bookmarks-header">
+                        <span>الإشارات</span>
+                        <button id="closeBookmarksBtn" class="control-btn-player small-icon" title="إغلاق"><i
+                                class="fas fa-xmark"></i></button>
+                    </div>
+                    <ul id="bookmarksList" class="bookmarks-list"></ul>
+                </div>
+                <p class="footer-credit">code by: @qx.pd </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Mode Page (Daily Word Sanctuary) -->
+    <div id="readingPage" class="page">
+        <!-- Persistent Khatmah Planner: Centrally managed -->
+        <div id="khatmahPlanner" class="khatmah-planner-card" style="margin-top: 20px;">
+            <div class="planner-header">
+                <h3><i class="fas fa-star"></i> خطة الختمة اليومية <span id="currentKhatmahDayBadge"
+                        class="khatmah-day-badge">اليوم 1</span></h3>
+                <div class="planner-meta" style="display:flex; align-items:center; gap:12px;">
+                    <span id="khatmahStreak" class="streak-badge" title="سلسلة الإنجاز اليومي"><i
+                            class="fas fa-fire"></i> 0 يوم</span>
+                    <!-- Settings/Modal trigger moved here -->
+                    <button class="icon-only-btn" onclick="showKhatmahPlanModal()" title="تعديل الخطة">
+                        <i class="fas fa-gear"></i>
+                    </button>
+                    <!-- Permanent Fullscreen trigger -->
+                    <button class="icon-only-btn" onclick="toggleFullScreen()" title="ملء الشاشة">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="planner-body">
+                <div id="activeKhatmahContent">
+                    <p id="khatmahGoalText">سوف تقرأ <span id="dailyVerseCount"
+                            style="color:#a855f7; font-weight:bold;">...</span> آية يومياً لتختم في <span
+                            id="khatmahDays" style="color:#a855f7; font-weight:bold;">...</span> يوم.</p>
+                    <div class="progress-container-mini">
+                        <div id="dailyProgress" class="progress-bar-mini" style="width: 0%"></div>
+                    </div>
+
+                    <div class="card-action-row">
+                        <small id="dailyStatusText">أكملت بفضل الله 0 يوماً</small>
+                        <button onclick="resumeReading()" class="resume-btn-mini">
+                            <i class="fas fa-play"></i> تابع القراءة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Start Button if no plan -->
+                <div id="noKhatmahContent" style="display:none; text-align:center; padding: 10px 0;">
+                    <p style="margin-bottom: 15px; opacity: 0.8; font-size: 0.95rem;">لم تحدد خطة للختمة
+                        بعد، ابدأ الآن لتنال الأجر</p>
+                    <button onclick="showKhatmahPlanModal()" class="khatmah-start-btn">
+                        <i class="fas fa-plus-circle"></i> تحديد مدة الختمة
+                    </button>
+                </div>
+
+                <!-- Achievements/Milestones -->
+                <div class="achievements-section"
+                    style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                    <h4 style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 10px;"><i class="fas fa-medal"></i>
+                        أوسمة الأثر</h4>
+                    <div id="milestonesList" class="milestones-container">
+                        <!-- Badges injected by AtharPro -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="readingChoiceView" style="display: none; text-align: center; padding: 40px 20px;">
+            <div class="welcome-box">
+                <i class="fas fa-book-quran" style="font-size: 3rem; color: #fbbf24; margin-bottom: 20px;"></i>
+                <h2>مرحباً بك في وردك اليومي</h2>
+                <div class="choice-grid"
+                    style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:30px;">
+                    <button onclick="AtharPro.khatmahAction('resume')" class="choice-btn primary">إكمال الختمة</button>
+                    <button onclick="AtharPro.khatmahAction('list')" class="choice-btn secondary">تصفح السور</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 1: Surah List & Search -->
+        <div id="readingListView" style="display: block; width: 100%; height: auto;">
+            <header>
+                <div class="header-content" style="flex-direction: column; gap: 10px; align-items: center;">
+                    <h1 style="margin-bottom: 5px;">الورد اليومي</h1>
+                    <!-- REDUNDANT BUTTONS REMOVED - Centralized in card -->
+                </div>
+            </header>
+
+            <div class="search-container">
+                <div class="search-input-group">
+                    <input type="text" id="readingSearchInput" class="simple-input"
+                        placeholder="ابحث عن سورة أو آية كاملة...">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+
+            <div class="surah-list-container">
+                <ul id="readingSurahList" class="song-list">
+                    <!-- Surah items will be injected here by JS -->
+                </ul>
+
+                <!-- Centered Dua al-Khatmah Box at the Bottom -->
+                <div class="dua-footer-wrapper">
+                    <div id="duaKhatmahBtnStatic" class="manual-style-li" onclick="openDuaReading()">
+                        <div class="song-info-list text-center">
+                            <h3 style="font-size: 1.1rem; font-weight: bold; margin-bottom: 2px;">دعاء ختم القرآن</h3>
+                            <p style="font-size: 0.7rem; opacity: 0.7;">قراءة مكتوبة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- View 2: Actual Reading Content (Initially Hidden) -->
+        <div id="readingDetailView" style="display: none; width: 100%; height: auto;">
+            <header class="sticky-header">
+                <div class="header-content">
+                    <button id="backToReadingListBtn" class="back-btn"><i class="fas fa-arrow-right"></i></button>
+                    <h2 id="readingSurahTitle">سورة ...</h2>
+                </div>
+                <div class="reading-actions" style="display:flex; gap:10px; margin-top: 10px; justify-content: center;">
+                    <button id="listenFromReadingBtn" class="action-btn" title="استماع لهذه السورة"><i
+                            class="fas fa-play"></i></button>
+                    <!-- Settings and Fullscreen are now in the persistent Khatmah Card -->
+                </div>
+            </header>
+
+            <!-- Khatmah Settings Modal (Overlay) -->
+            <div id="khatmahModal" class="khatmah-modal" style="display: none;">
+                <div class="khatmah-modal-content">
+                    <h3>حدد مدة الختمة</h3>
+                    <div class="khatmah-options">
+                        <button class="khatmah-opt" data-days="7">7 أيام (أسبوعية)</button>
+                        <button class="khatmah-opt" data-days="15">15 يوماً</button>
+                        <button class="khatmah-opt" data-days="30">30 يوماً (شهرية)</button>
+                        <button class="khatmah-opt" data-days="60">60 يوماً</button>
+                    </div>
+                    <div class="custom-khatmah">
+                        <input type="number" id="customDaysInput" placeholder="أيام مخصصة..." min="1" max="1000">
+                        <button id="setCustomKhatmahBtn">تأكيد</button>
+                    </div>
+                    <button id="closeKhatmahModal" class="close-modal-btn">إغلاق</button>
+                </div>
+            </div>
+
+            <div class="reading-settings-bar">
+                <div class="font-controls">
+                    <button id="decreaseFont" title="تصغير الخط"><i class="fas fa-minus"></i></button>
+                    <span id="fontSizeDisplay">100%</span>
+                    <button id="increaseFont" title="تكبير الخط"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="theme-controls pro-themes">
+                    <button class="theme-opt mushaf-classic" onclick="AtharPro.setMushafTheme('classic')"
+                        title="مصحف كلاسيكي"></button>
+                    <button class="theme-opt mushaf-night" onclick="AtharPro.setMushafTheme('night-gold')"
+                        title="ليلي ذهبي"></button>
+                    <button class="theme-opt mushaf-forest" onclick="AtharPro.setMushafTheme('forest')"
+                        title="أخضر مريح"></button>
+                </div>
+                <button class="focus-mode-btn" onclick="AtharPro.toggleFocusMode()" title="وضع الخشوع">
+                    <i class="fas fa-eye-slash"></i>
+                </button>
+            </div>
+
+            <div class="reading-container">
+                <div id="readingContent" class="reading-content-area">
+                    <!-- Quran text will be rendered here -->
+                </div>
+            </div>
+            <div class="reading-footer">
+                <button id="prevSurahReading" class="nav-reading-btn"><i class="fas fa-chevron-right"></i> السورة
+                    السابقة</button>
+                <button id="nextSurahReading" class="nav-reading-btn">السورة التالية <i
+                        class="fas fa-chevron-left"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adhkar Page -->
+    <div id="adhkarPage" class="page">
+        <header>
+            <div class="header-content">
+                <button id="adhkarBackBtn" class="back-btn" style="display: none;"><i
+                        class="fas fa-arrow-right"></i></button>
+                <h1 id="adhkarPageTitle">الأذكار والسبحة</h1>
+            </div>
+        </header>
+
+        <div class="adhkar-container">
+            <!-- Adhkar Categories (Home View) -->
+            <div id="adhkarHome" class="adhkar-grid">
+                <div class="adhkar-card" onclick="openAdhkarCategory('أذكار الصباح')">
+                    <div class="card-icon"><i class="fas fa-sun"></i></div>
+                    <h3>أذكار الصباح</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('أذكار المساء')">
+                    <div class="card-icon"><i class="fas fa-moon"></i></div>
+                    <h3>أذكار المساء</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('أذكار النوم')">
+                    <div class="card-icon"><i class="fas fa-bed"></i></div>
+                    <h3>أذكار النوم</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('أذكار الاستيقاظ')">
+                    <div class="card-icon"><i class="fas fa-mug-hot"></i></div>
+                    <h3>أذكار الاستيقاظ</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('أذكار بعد السلام من الصلاة المفروضة')">
+                    <div class="card-icon"><i class="fas fa-mosque"></i></div>
+                    <h3>أذكار بعد الصلاة</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('تسابيح')">
+                    <div class="card-icon"><i class="fas fa-bahai"></i></div>
+                    <h3>تسابيح</h3>
+                </div>
+
+                <div class="adhkar-card" onclick="openAdhkarCategory('أدعية قرآنية')">
+                    <div class="card-icon"><i class="fas fa-book-quran"></i></div>
+                    <h3>أدعية قرآنية</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('أدعية الأنبياء')">
+                    <div class="card-icon"><i class="fas fa-person-praying"></i></div>
+                    <h3>أدعية الأنبياء</h3>
+                </div>
+                <div class="adhkar-card" onclick="openAdhkarCategory('tasbeeh')">
+                    <div class="card-icon"><i class="fas fa-fingerprint"></i></div>
+                    <h3>السبحة الإلكترونية</h3>
+                </div>
+            </div>
+
+            <!-- Adhkar Details View (Hidden by default) -->
+            <div id="adhkarDetails" class="adhkar-details-view" style="display: none;">
+                <!-- New Sticky Progress Bar -->
+                <div id="adhkarProgressContainer" class="adhkar-progress-sticky">
+                    <div class="adhkar-progress-info">
+                        <span id="adhkarProgressPercent">0%</span>
+                        <span id="adhkarProgressStatus">اكتمل 0 من 0</span>
+                    </div>
+                    <div class="adhkar-progress-bar-bg">
+                        <div id="adhkarProgressBar" class="adhkar-progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="adhkarList" class="adhkar-list">
+                    <!-- Dynamic Content -->
+                </div>
+            </div>
+
+            <!-- Tasbeeh View (Hidden by default) -->
+            <div id="tasbeehView" class="tasbeeh-view" style="display: none;">
+                <div class="tasbeeh-display">
+                    <span id="tasbeehCount">0</span>
+                    <small>عدد التسبيحات</small>
+                </div>
+                <button id="tasbeehBtn" class="tasbeeh-btn">سبحان الله</button>
+                <div class="tasbeeh-controls">
+                    <button onclick="resetTasbeeh()" class="reset-btn"><i class="fas fa-rotate-right"></i>
+                        تصفير</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Sync Mode Page -->
+    <div id="syncPage" class="page">
+        <header>
+            <button id="backFromSyncBtn" class="back-btn"><i class="fas fa-arrow-right"></i> إلغاء</button>
+            <h1>أداة مزامنة الآيات</h1>
+        </header>
+
+        <div class="sync-container">
+            <div class="sync-header-info">
+                <h2 id="syncSurahTitle">اسم السورة</h2>
+                <div class="sync-status">
+                    الآية الحالية: <span id="syncCurrentVerseNum">1</span> / <span id="syncTotalVerses">0</span>
+                </div>
+            </div>
+
+            <div class="sync-controls">
+                <button id="markVerseBtn" class="sync-mark-btn">
+                    <i class="fas fa-stopwatch"></i>
+                    <span>اضغط عند بداية الآية</span>
+                    <small>(أو اضغط Space)</small>
+                </button>
+                <div class="sync-playback-tools">
+                    <button id="syncPlayPauseBtn" class="sync-tool-btn" title="تشغيل/إيقاف مؤقت">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                    <button id="syncSeekBackBtn" class="sync-tool-btn" title="رجوع 5 ثواني">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                </div>
+            </div>
+
+
+            <div class="sync-preview">
+                <div class="sync-box current">
+                    <small>الآية الحالية (اضغط عند سماعها):</small>
+                    <div id="syncVerseText" class="sync-verse-text">...</div>
+                </div>
+                <div class="sync-box next">
+                    <small>الآية القادمة (استعد):</small>
+                    <div id="syncNextVerseText" class="sync-next-verse-text">...</div>
+                </div>
+            </div>
+
+            <div class="sync-actions-extra">
+                <button id="syncStepBackBtn" class="sync-secondary-btn">
+                    <i class="fas fa-undo"></i> تراجع عن الخطوة الأخيرة
+                </button>
+            </div>
+
+
+            <div id="syncResultArea" style="display: none;">
+                <h3>تم الانتهاء! انسخ البيانات الجديدة:</h3>
+                <textarea id="syncOutputJson" readonly class="sync-output"></textarea>
+                <button id="copySyncResult" class="settings-btn">نسخ الكود</button>
+            </div>
+
+            <div class="sync-instructions">
+                <ul>
+                    <li>شغل السورة واستمع بدقة.</li>
+                    <li>بمجرد نطق القارئ لبداية الآية الظاهرة، اضغط على الزر الكبير.</li>
+                    <li>سينتقل التطبيق تلقائياً للآية التالية.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tafsir Side-Drawer -->
+    <div id="tafsirDrawer" class="tafsir-drawer">
+        <div class="tafsir-content">
+            <button id="closeTafsirBtn" class="close-tafsir" title="إغلاق" onclick="closeTafsir()">
+                <i class="fas fa-xmark"></i>
+            </button>
+            <div class="tafsir-header">
+                <div class="tafsir-header-top">
+                    <div class="tafsir-title-group">
+                        <i class="fas fa-book-open"></i>
+                        <h3>تفسير الآية</h3>
+                        <span id="tafsirVerseRef">1:1</span>
+                    </div>
+                    <div class="tafsir-selector-wrapper">
+                        <select id="tafsirSelect" class="tafsir-select">
+                            <option value="ibnkathir">تفسير ابن كثير</option>
+                            <option value="moyassar">التفسير الميسر</option>
+                            <option value="saadi">تفسير السعدي</option>
+                            <option value="tabari">تفسير الطبري</option>
+                            <option value="qurtubi">تفسير القرطبي</option>
+                            <option value="baghawi">تفسير البغوي</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tafsir-tools">
+                    <button id="fontIncreaseBtn" class="tool-btn" title="تكبير الخط">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="fontDecreaseBtn" class="tool-btn" title="تصغير الخط">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="tool-divider"></div>
+                    <button id="copyTafsirBtn" class="tool-btn" title="نسخ التفسير">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="tafsirBody" class="tafsir-body">
+                <div class="tafsir-loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل التفسير...</p>
+                </div>
+                <!-- Tafsir text will be injected here -->
+            </div>
+            <div class="tafsir-footer">
+                <p>المصدر: التفسير الميسر</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hadith Page -->
+    <div id="hadithPage" class="page">
+        <header>
+            <div class="header-content"
+                style="display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                <button onclick="showHomePage()" class="back-btn"
+                    style="position: absolute; right: 0; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;"><i
+                        class="fas fa-arrow-right"></i></button>
+                <h1>الأحاديث النبوية</h1>
+            </div>
+        </header>
+        <div class="hadith-container">
+            <div class="hadith-search-container-small">
+                <button id="toggleHadithSearchBtn" title="بحث"><i class="fas fa-search"></i></button>
+                <input type="text" id="hadithSearchInput" placeholder="بحث..." style="display:none;">
+            </div>
+            <div id="hadithCategories" class="hadith-categories">
+                <button class="hadith-cat-btn active" data-book="nawawi">الأربعون النووية</button>
+                <button class="hadith-cat-btn" data-book="bukhari">صحيح البخاري</button>
+                <button class="hadith-cat-btn" data-book="muslim">صحيح مسلم</button>
+                <button class="hadith-cat-btn" data-book="abudawud">سنن أبي داود</button>
+                <button class="hadith-cat-btn" data-book="tirmidhi">سنن الترمذي</button>
+                <button class="hadith-cat-btn" data-book="nasai">سنن النسائي</button>
+                <button class="hadith-cat-btn" data-book="ibnmajah">سنن ابن ماجه</button>
+            </div>
+
+            <div id="hadithGradesFilter" class="hadith-grades-filter">
+                <button class="grade-filter-btn active" data-grade="all">الكل</button>
+                <button class="grade-filter-btn" data-grade="sahih">صحيح</button>
+                <button class="grade-filter-btn" data-grade="hasan">حسن</button>
+                <button class="grade-filter-btn" data-grade="daif">ضعيف</button>
+            </div>
+
+            <div id="hadithChaptersSection" class="hadith-chapters-section" style="display: none;">
+                <button id="toggleChaptersBtn" class="toggle-chapters-btn">
+                    <i class="fas fa-list-ul"></i> <span>تصفح الأبواب</span>
+                </button>
+                <div id="hadithChaptersList" class="hadith-chapters-list" style="display: none;">
+                    <!-- Chapters will be injected here -->
+                </div>
+            </div>
+            <div id="hadithList" class="hadith-list">
+                <div class="hadith-loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل الأحاديث...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collective Khatmah Page (Full Page) -->
+    <!-- Collective Khatmah Page REMOVED -->
+
+    <!-- Prayer Times Page -->
+    <div id="prayerPage" class="page">
+        <header>
+            <div class="header-content"
+                style="display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                <button onclick="showHomePage()" class="back-btn"
+                    style="position: absolute; right: 0; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;"><i
+                        class="fas fa-arrow-right"></i></button>
+                <h1>مواقيت الصلاة</h1>
+            </div>
+        </header>
+        <div class="prayer-container">
+            <!-- Next Prayer Card -->
+            <div class="next-prayer-card">
+                <div class="date-info" id="fullDateInfo">---</div>
+                <div class="next-prayer-info">
+                    <span id="nextPrayerName">جاري التحميل...</span>
+                    <h2 id="nextPrayerTime">--:--</h2>
+                    <p id="prayerCountdown">متبقي --:--:--</p>
+                </div>
+                <div class="location-info">
+                    <i class="fas fa-location-dot"></i>
+                    <span id="userLocation">تحديد الموقع...</span>
+                    <div class="location-actions">
+                        <button id="changeLocationBtn" title="تغيير الموقع يدوياً"><i class="fas fa-edit"></i></button>
+                        <button id="refreshLocation" title="تحديث الموقع التلقائي"><i
+                                class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Location Modal -->
+            <div id="locationModal" class="khatmah-modal" style="display: none;">
+                <div class="khatmah-modal-content">
+                    <h3>تغيير الموقع يدوياً</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">أدخل اسم مدينتك (مثلاً: الجزائر،
+                        مكة، دبي)</p>
+                    <div class="search-input-group">
+                        <input type="text" id="citySearchInput" placeholder="ادخل اسم المدينة..."
+                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; font-size: 1rem; margin-bottom: 20px;">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="saveCityBtn" class="set-custom-btn"
+                            style="flex: 1; padding: 12px; border-radius: 10px; background: #a855f7; color: white; border: none; cursor: pointer; font-weight: bold;">بحث
+                            وتعيين</button>
+                    </div>
+                    <button id="closeLocationModal" class="close-modal-btn"
+                        style="width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; border-radius: 10px; cursor: pointer;">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Times Grid -->
+        <div class="prayer-times-grid">
+            <div class="prayer-time-item" data-prayer="Fajr">
+                <span class="p-name">الفجر</span>
+                <span class="p-time" id="time-Fajr">--:--</span>
+            </div>
+            <div class="prayer-time-item" data-prayer="Sunrise">
+                <span class="p-name">الشروق</span>
+                <span class="p-time" id="time-Sunrise">--:--</span>
+            </div>
+            <div class="prayer-time-item" data-prayer="Dhuhr">
+                <span class="p-name">الظهر</span>
+                <span class="p-time" id="time-Dhuhr">--:--</span>
+            </div>
+            <div class="prayer-time-item" data-prayer="Asr">
+                <span class="p-name">العصر</span>
+                <span class="p-time" id="time-Asr">--:--</span>
+            </div>
+            <div class="prayer-time-item" data-prayer="Maghrib">
+                <span class="p-name">المغرب</span>
+                <span class="p-time" id="time-Maghrib">--:--</span>
+            </div>
+            <div class="prayer-time-item" data-prayer="Isha">
+                <span class="p-name">العشاء</span>
+                <span class="p-time" id="time-Isha">--:--</span>
+            </div>
+        </div>
+
+        <!-- Qibla Compass Section -->
+        <div class="qibla-section">
+            <h3>اتجاه القبلة</h3>
+            <div class="compass-container">
+                <div id="compass" class="compass">
+                    <div class="compass-arrow"></div>
+                    <div class="compass-labels">
+                        <span class="label-n">N</span>
+                        <span class="label-e">E</span>
+                        <span class="label-s">S</span>
+                        <span class="label-w">W</span>
+                    </div>
+                </div>
+                <div class="qibla-status" id="qiblaStatus">قم بتحريك الهاتف لمعايرة البوصلة</div>
+            </div>
+        </div>
+
+        <div class="adhan-settings">
+            <div class="settings-title">
+                <i class="fas fa-volume-high"></i>
+                <h3>إعدادات الأذان</h3>
+            </div>
+
+            <div class="setting-item adhan-sound-select">
+                <span>صوت الأذان:</span>
+                <select id="adhanSoundSelect" class="coll-select" style="margin-top:0; width:auto;">
+                    <option value="https://www.islamcan.com/adhan/sounds/adhan-from-makkah.mp3">أذان مكة المكرمة
+                    </option>
+                    <option value="https://stream.assabile.com/media/adhan/603.mp3">أذان الجزائر (بصوت رابح بن درة)
+                    </option>
+                    <option value="https://www.islamcan.com/adhan/sounds/adhan-from-madina.mp3">أذان المدينة المنورة
+                    </option>
+                    <option value="https://www.islamcan.com/adhan/sounds/adhan-alaqsa.mp3">أذان المسجد الأقصى</option>
+                    <option value="https://www.islamcan.com/adhan/sounds/adhan-from-egypt.mp3">أذان من مصر</option>
+                    <option value="custom">-- صوت مخصص --</option>
+                </select>
+                <input type="file" id="customAdhanInput" accept="audio/*" style="display:none;">
+                <button id="uploadAdhanBtn" class="action-btn" title="رفع أذان خاص"
+                    style="width:36px; height:36px; margin-right:10px;">
+                    <i class="fas fa-upload"></i>
+                </button>
+            </div>
+
+            <div class="setting-item">
+                <span>تفعيل الأذان (صوت)</span>
+                <label class="switch">
+                    <input type="checkbox" id="adhanToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <span>تنبيهات النظام (إشعارات)</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label class="switch">
+                        <input type="checkbox" id="systemNotifToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="detailed-adhan-toggles">
+                <p class="section-hint">اختر الصلوات التي تريد سماع الأذان لها:</p>
+                <div class="adhan-toggles-grid">
+                    <div class="p-toggle">
+                        <span>الفجر</span>
+                        <label class="switch small"><input type="checkbox" class="p-adhan-toggle" data-prayer="Fajr"
+                                checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="p-toggle">
+                        <span>الظهر</span>
+                        <label class="switch small"><input type="checkbox" class="p-adhan-toggle" data-prayer="Dhuhr"
+                                checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="p-toggle">
+                        <span>العصر</span>
+                        <label class="switch small"><input type="checkbox" class="p-adhan-toggle" data-prayer="Asr"
+                                checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="p-toggle">
+                        <span>المغرب</span>
+                        <label class="switch small"><input type="checkbox" class="p-adhan-toggle" data-prayer="Maghrib"
+                                checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="p-toggle">
+                        <span>العشاء</span>
+                        <label class="switch small"><input type="checkbox" class="p-adhan-toggle" data-prayer="Isha"
+                                checked><span class="slider round"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+    <audio id="adhanAudio" src="https://www.islamcan.com/adhan/sounds/adhan-from-makkah.mp3" preload="auto"></audio>
+
+    <!-- Contact Content Section (Moved) -->
+    <div id="contactContent" class="contact-content">
+        <div class="contact-content-inner">
+            <button class="close-contact">&times;</button>
+            <h2>تواصل معنا</h2>
+            <div class="contact-text">
+                <p>يمكنك التواصل معنا عبر منصات التواصل الاجتماعي:</p>
+                <div class="social-links">
+                    <a href="https://t.me/pnqqy" target="_blank" class="social-link telegram">
+                        <i class="fab fa-telegram"></i>
+                        <span>Telegram</span>
+                    </a>
+                    <a href="https://wa.me/213775525723" target="_blank" class="social-link whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                    <a href="mailto:admin@athar-app.com" class="social-link email">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email</span>
+                    </a>
+                    <a href="https://www.instagram.com/9g7.x" target="_blank" class="social-link instagram">
+                        <i class="fab fa-instagram"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://www.youtube.com/channel/UCl7sbdme2LGjwEam-11mvrw" target="_blank"
+                        class="social-link youtube">
+                        <i class="fab fa-youtube"></i>
+                        <span>YouTube</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@qx.pd.7x" target="_blank" class="social-link tiktok">
+                        <i class="fab fa-tiktok"></i>
+                        <span>TikTok</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Content Section (Moved) -->
+    <div id="helpContent" class="help-content">
+        <div class="help-content-inner">
+            <button class="close-help">&times;</button>
+            <h2><i class="fas fa-circle-info" style="color:#a855f7; margin-left:10px;"></i> دليل الاستخدام</h2>
+            <div class="help-text">
+                <p class="intro-text">مرحباً بكم في منصة أثـر | Athar. نسعى لتقديم تجربة روحانية
+                    متكاملة تجمع بين جمال التلاوة وعمق التدبر.</p>
+
+                <div class="help-grid">
+                    <div class="help-item">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <div>
+                            <strong>المساعد الذكي</strong>
+                            <p>مرشدك الشخصي الذي يقدم لك نصائح نبوية وأذكاراً وسنناً مهجورة بناءً على وقتك ونشاطك داخل
+                                التطبيق.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-book-quran"></i>
+                        <div>
+                            <strong>خطة الختمة</strong>
+                            <p>حدد المدة التي تود ختم القرآن فيها، وسيقوم التطبيق بحساب وردك اليومي ومتابعة تقدمك بدقة.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-quote-right"></i>
+                        <div>
+                            <strong>موسوعة الأحاديث</strong>
+                            <p>تصفح كتب السنة السبعة مع ميزة البحث الذكي والفلترة حسب صحة الحديث (صحيح، حسن، ضعيف).</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-cloud-arrow-down"></i>
+                        <div>
+                            <strong>الاستخدام بدون إنترنت</strong>
+                            <p>يمكنك تحميل المصحف كاملاً مع الخلفيات والأحاديث والتفاسير ليعمل التطبيق كلياً بدون
+                                إنترنت.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>الأذان والقبلة</strong>
+                            <p>تنبيهات دقيقة لمواقيت الصلاة مع نظام "الحارس الصامت" لضمان الأذان في الخلفية، وتحديد
+                                القبلة بالبوصلة.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-hands-praying"></i>
+                        <div>
+                            <strong>الأذكار والتحصين</strong>
+                            <p>مكتبة شاملة للأذكار مع عدادات تفاعلية ونظام مكافآت لتحفيزك على المداومة اليومية.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-headphones-simple"></i>
+                        <div>
+                            <strong>تلاوات خاشعة</strong>
+                            <p>استمع لأشهر القراء مع خلفيات فيديو سينمائية متحركة تزيد من خشوعك أثناء الاستماع والقراءة.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="help-item">
+                        <i class="fas fa-circle-check"></i>
+                        <div>
+                            <strong>التفسير والتدبر</strong>
+                            <p>فسر أي آية بضغطة واحدة، واستكشف كنوز القرآن من خلال واجهة قراءة مريحة للعين.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar (Mobile Optimized) -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navigateTo('homePage'); updateActiveNav(this)">
+            <i class="fas fa-headphones"></i>
+            <span>استماع</span>
+        </div>
+        <div class="nav-item" onclick="showReadingPageList(); updateActiveNav(this)">
+            <i class="fas fa-book-open"></i>
+            <span>قراءة</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('adhkarPage'); updateActiveNav(this)">
+            <i class="fas fa-hands-praying"></i>
+            <span>أذكار</span>
+        </div>
+
+        <div class="nav-item" onclick="openSideMenu()">
+            <i class="fas fa-bars"></i>
+            <span>المزيد</span>
+        </div>
+    </div>
+
+    <div id="shareCardOverlay" class="share-overlay" style="display: none;">
+        <div class="share-card-box">
+            <canvas id="shareCanvas" width="500" height="600" style="max-width: 100%; border-radius: 15px;"></canvas>
+            <div class="share-actions">
+                <button class="share-btn-pro btn-download-card" onclick="AtharPro.downloadCard()">
+                    <i class="fas fa-download"></i> حفظ الصورة
+                </button>
+                <button class="share-btn-pro btn-close-card"
+                    onclick="document.getElementById('shareCardOverlay').style.display='none'">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="tafsir_logic.js"></script>
+    <script src="adhkar_advanced.js"></script>
+    <script src="hadith_data.js"></script>
+    <script src="hadiths_logic.js"></script>
+    <script src="prayer_logic.js"></script>
+    <script src="score_engine.js"></script>
+    <script src="ai_companion.js"></script>
+    <script src="athar_pro.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+{
+    "name": "أثـر | Athar",
+    "short_name": "Athar",
+    "description": "منصة أثر القرآنية الشاملة للاستماع والقراءة بتصميم عصري",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#210033",
+    "theme_color": "#380056",
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,345 @@
+/* Athar Pro Features Styling */
+
+/* 1. Offline Hub Styles */
+.storage-info-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.storage-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.storage-bar-bg {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.storage-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a855f7, #ec4899);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.downloaded-surahs-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.downloaded-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+}
+
+.downloaded-item:last-child {
+    border-bottom: none;
+}
+
+.delete-download-btn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.delete-download-btn:hover {
+    background: rgba(239, 68, 68, 0.4);
+}
+
+/* 2. Visual Journey Milestones */
+.milestones-container {
+    display: flex;
+    gap: 15px;
+    padding: 10px 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.milestones-container::-webkit-scrollbar {
+    display: none;
+}
+
+.badge-item {
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.3;
+    filter: grayscale(1);
+    transition: 0.5s;
+}
+
+.badge-item.unlocked {
+    opacity: 1;
+    filter: grayscale(0);
+}
+
+.badge-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(168, 85, 247, 0.1);
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    position: relative;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+}
+
+.badge-item.unlocked .badge-icon {
+    border-color: #fbbf24;
+    color: #fbbf24;
+}
+
+.badge-name {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #fff;
+}
+
+/* 3. Progressive Share Card Overlay */
+#shareCardOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 11000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.share-card-canvas-wrapper {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1/1.2;
+    background: #210033;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.share-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.share-btn-pro {
+    flex: 1;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-download-card {
+    background: #a855f7;
+    color: white;
+}
+
+.btn-close-card {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* 4. Reading Choice View Styles */
+.choice-btn {
+    width: 100%;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(168, 85, 247, 0.1);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+}
+
+.choice-btn.primary {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4));
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
+}
+
+.choice-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(168, 85, 247, 0.2);
+    border-color: #a855f7;
+}
+
+.choice-btn.primary:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.6), rgba(236, 72, 153, 0.6));
+}
+
+.welcome-box {
+    animation: fadeInScale 0.5s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 5. Mushaf Themes */
+#readingDetailView.theme-classic {
+    background-color: #f4ecd8 !important;
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #2c1810 !important;
+}
+
+#readingDetailView.theme-classic .verse-text {
+    color: #2c1810 !important;
+}
+
+#readingDetailView.theme-night-gold {
+    background: #0f172a !important;
+    color: #fbbf24 !important;
+}
+
+#readingDetailView.theme-night-gold .verse-text {
+    color: #fbbf24 !important;
+}
+
+#readingDetailView.theme-night-gold .verse-num-badge {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border-color: #fbbf24;
+}
+
+#readingDetailView.theme-forest {
+    background-color: #ecf3ec !important;
+    color: #164e63 !important;
+}
+
+#readingDetailView.theme-forest .verse-text {
+    color: #164e63 !important;
+}
+
+/* 6. Cinematic Focus Mode */
+body.cinematic-focus .top-nav,
+body.cinematic-focus .bottom-nav,
+body.cinematic-focus .reading-settings-bar,
+body.cinematic-focus .surah-separator,
+body.cinematic-focus .daily-target-info,
+body.cinematic-focus .done-btn-container,
+body.cinematic-focus header {
+    display: none !important;
+}
+
+body.cinematic-focus #readingPage {
+    padding-top: 50px !important;
+}
+
+body.cinematic-focus #readingDetailView {
+    background: none !important;
+    box-shadow: none !important;
+}
+
+body.cinematic-focus .reading-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+body.cinematic-focus .verse-item {
+    text-align: center;
+    font-size: 1.8rem;
+    line-height: 3;
+    padding: 40px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Float Focus Btn for Exit */
+body.cinematic-focus .focus-mode-btn {
+    display: block !important;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 10001;
+    background: #fbbf24;
+    color: #000;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 7. Stats Dashboard */
+.stats-dashboard-card {
+    background: rgba(168, 85, 247, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.stats-circles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    text-align: center;
+}
+
+.stat-circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.circle-val {
+    width: 70px;
+    height: 70px;
+    border: 4px solid #a855f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.circle-label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
