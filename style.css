@@ -7557,18 +7557,18 @@ body {
 }
 
 .khatmah-planner-card {
-    width: 95%;
-    margin: 0 auto 20px;
+    width: 92%;
+    max-width: 450px;
+    margin: 0 auto 12px;
     background: linear-gradient(135deg, rgba(45, 20, 70, 0.98), rgba(20, 10, 40, 1));
     backdrop-filter: blur(25px);
-    border: 2px solid rgba(168, 85, 247, 0.3);
-    border-radius: 25px;
-    padding: 22px;
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 15px;
+    padding: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
     position: sticky;
-    top: 15px;
+    top: 8px;
     z-index: 1001;
-    /* Above sticky headers */
     overflow: hidden;
 }
 
@@ -7577,15 +7577,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
 }
 
 .planner-header h3 {
-    font-size: 1.15rem;
+    font-size: 0.9rem;
     color: #fff;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     font-weight: bold;
 }
 
@@ -7597,43 +7597,57 @@ body {
 .khatmah-day-badge {
     background: #a855f7;
     color: #fff;
-    padding: 4px 14px;
+    padding: 2px 8px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     font-weight: bold;
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
 }
 
 .streak-badge {
     background: rgba(255, 69, 0, 0.15);
     color: #ff4500;
-    padding: 6px 14px;
+    padding: 3px 8px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     font-weight: bold;
     border: 1px solid rgba(255, 69, 0, 0.3);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
 }
 
 .khatmah-start-btn {
     background: linear-gradient(90deg, #a855f7, #ec4899);
     color: white;
     border: none;
-    padding: 14px 30px;
-    border-radius: 18px;
-    font-size: 1.1rem;
+    padding: 8px 15px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 20px rgba(168, 85, 247, 0.4);
-    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    margin: 8px auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .khatmah-start-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.6);
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+@media (max-width: 480px) {
+    .khatmah-start-btn {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
 }
 
 .card-action-row {
