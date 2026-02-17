@@ -280,20 +280,30 @@ async function startMasterOfflineSync() {
 
         statusText.textContent = `جاري تحميل سورة ${song.title} ومحتوياتها...`;
 
+        // Send assets to SW queue instead of fetching directly
         for (const url of assets) {
-            const isCached = await isUrlCached(url);
-            if (!isCached) {
-                try {
-                    // Fetching with mode no-cors triggers the SW's cache-first/network-fallback+put logic
-                    // We don't need to read the blob here as the SW clone() handles it, 
-                    // but we do want to wait slightly for headers to be processed.
-                    const response = await fetch(url, { mode: 'no-cors' });
-                    // Small delay to let stream finish if browser optimizations allow
-                    await new Promise(r => setTimeout(r, 50));
-                } catch (e) {
-                    console.warn(`Failed to sync asset for ${song.title}`, e);
-                }
-            }
+            if (!navigator.serviceWorker.controller) continue;
+
+            navigator.serviceWorker.controller.postMessage({
+                action: 'download',
+                url: url
+            });
+
+            // Wait for confirmation or timeout
+            await new Promise(resolve => {
+                const handler = (e) => {
+                    if (e.data.url === url) {
+                        navigator.serviceWorker.removeEventListener('message', handler);
+                        resolve();
+                    }
+                };
+                navigator.serviceWorker.addEventListener('message', handler);
+                // Safety timeout: proceed after 10s even if no confirmation (don't block queue)
+                setTimeout(() => {
+                    navigator.serviceWorker.removeEventListener('message', handler);
+                    resolve();
+                }, 10000);
+            });
         }
 
         completed++;
@@ -304,22 +314,19 @@ async function startMasterOfflineSync() {
         if (i % 2 === 0) await new Promise(r => setTimeout(r, 300));
     }
 
-    statusText.textContent = "✅ اكتمل التحميل! المصحف متاح أوفلاين.";
-    statusText.style.color = "#4caf50";
     localStorage.setItem('master_sync_complete', 'true');
-
+    statusText.innerHTML = '✅ تم تحميل المصحف كاملاً بنجاح!';
     if (typeof showPointToast === 'function') {
         showPointToast(100, "تم تحميل التطبيق كاملاً بنجاح! يمكنك الآن استخدامه في أي مكان بدون إنترنت.");
     }
-
     setTimeout(() => {
         wrapper.style.display = 'none';
         startBtn.style.display = 'flex';
-        startBtn.innerHTML = '<i class="fas fa-check-circle"></i> تم التحميل بنجاح';
+        startBtn.innerHTML = '<i class="fas fa-check-circle"></i> <span>تم التحميل</span>';
         startBtn.style.borderColor = '#4caf50';
         startBtn.style.background = 'rgba(76, 175, 80, 0.1)';
         startBtn.style.color = '#4caf50';
-    }, 5000);
+    }, 3000);
 }
 
 let isNavigating = false;
@@ -343,7 +350,12 @@ function navigateTo(pageId, options = {}) {
 
     // Handle History/Hash
     if (!options.isBack) {
-        window.location.hash = pageId;
+        let hash = pageId;
+        if (options.surahId) hash += `?surah=${options.surahId}`;
+        if (options.verseNum) hash += `&verse=${options.verseNum}`;
+        if (options.bookKey) hash += `?book=${options.bookKey}`;
+
+        window.location.hash = hash;
     }
 
     // Transition Logic
@@ -397,6 +409,52 @@ function showTargetPage(targetPage, pageId, options) {
 
     setTimeout(() => { isNavigating = false; }, 400);
 }
+
+/**
+ * Handle Routing / Deep Linking
+ */
+function handleRouting() {
+    const hash = window.location.hash.substring(1) || 'homePage';
+    const [pageId, queryStr] = hash.split('?');
+    const params = new URLSearchParams(queryStr);
+
+    const surahId = params.get('surah');
+    const verseNum = params.get('verse');
+    const bookKey = params.get('book');
+
+    if (pageId === 'readingPage' && surahId) {
+        const surah = songs.find(s => s.id == surahId);
+        if (surah) {
+            openReadingSurah(surah, verseNum);
+            return;
+        }
+    }
+
+    if (pageId === 'playerPage' && surahId) {
+        const sIdx = songs.findIndex(s => s.id == surahId);
+        if (sIdx !== -1) {
+            currentSongIndex = sIdx;
+            loadSong(songs[sIdx]);
+            if (params.get('play')) playTrack();
+        }
+    }
+
+    if (pageId === 'hadithPage' && bookKey) {
+        navigateTo('hadithPage', { bookKey: bookKey, isBack: true });
+        return;
+    }
+
+    // Default navigation
+    if (document.getElementById(pageId)) {
+        navigateTo(pageId, { isBack: true });
+    }
+}
+
+// Listen for hash changes
+window.addEventListener('hashchange', () => {
+    // Only route if we are not already navigating via navigateTo
+    if (!isNavigating) handleRouting();
+});
 
 function handlePageStyles(pageId) {
     bodyElement.classList.remove('player-active-bg', 'detail-active-bg');
@@ -496,9 +554,7 @@ function hideAllPages() {
     });
 }
 
-// Side Menu Listeners
-if (navHome) navHome.addEventListener('click', (e) => { e.preventDefault(); showHomePage(); });
-if (navReading) navReading.addEventListener('click', (e) => { e.preventDefault(); showReadingPageList(); });
+// Side Menu Listeners are handled at the bottom of the script for proper initialization order
 // Khatmah navigation removed
 
 function showSettingsPage() {
@@ -2291,11 +2347,8 @@ if (navHome) navHome.addEventListener('click', (e) => {
 });
 if (navReading) navReading.addEventListener('click', (e) => {
     e.preventDefault();
-    if (khatmahPlan) {
-        showReadingPageWithKhatmah();
-    } else {
-        showReadingPage(currentSongIndex); // Start reading from current playing or first
-    }
+    showReadingPageList(); // This centralized function handles both choice view and list
+    closeSidebar();
 });
 
 // Reading Page Controls (backToHomeFromReadingBtn already defined at top of file)
@@ -2465,6 +2518,16 @@ function setKhatmahPlan(days) {
 
 function showReadingPageWithKhatmah() {
     if (!khatmahPlan) return;
+
+    // Explicitly manage sub-view visibility
+    const choiceView = document.getElementById('readingChoiceView');
+    const listView = document.getElementById('readingListView');
+    const detailView = document.getElementById('readingDetailView');
+
+    if (choiceView) choiceView.style.display = 'none';
+    if (listView) listView.style.display = 'none';
+    if (detailView) detailView.style.display = 'block';
+
     renderDailyKhatmahVerses();
     updateKhatmahUI();
     navigateTo('readingPage');
@@ -2916,7 +2979,9 @@ function init() {
 
     updatePlayPauseIcon();
     updateRepeatButtonUI();
-    showHomePage();
+
+    // Check Routing / Deep Links
+    handleRouting();
 
     // Check for resume after a short delay to ensure UI is ready
     setTimeout(checkResumePlayback, 1000);
@@ -3498,32 +3563,15 @@ function toggleImmersiveMode() {
 
 // --- New Khatmah Buttons Logic ---
 
-function showKhatmahPlanModal() {
+// showKhatmahPlanModal moved to global window scope earlier for modal support
+function showCurrentKhatmahStatus() {
     const savedPlan = localStorage.getItem('khatmahPlan');
     if (savedPlan) {
         const plan = JSON.parse(savedPlan);
         const day = plan.currentDay || 1;
-        if (typeof showPointToast === 'function') {
-            showPointToast(0, `خطتك الحالية: اليوم ${day} من ${plan.days}`);
-        } else {
-            alert(`خطتك الحالية: اليوم ${day} من ${plan.days}`);
-        }
+        showPointToast(0, `خطتك الحالية: اليوم ${day} من ${plan.days}`);
     } else {
-        const days = prompt("كم يوماً تريد لختم القرآن؟", "30");
-        if (days && !isNaN(days)) {
-            const plan = {
-                days: parseInt(days),
-                startDate: Date.now(),
-                currentDay: 1,
-                dailyTarget: Math.ceil(604 / parseInt(days))
-            };
-            localStorage.setItem('khatmahPlan', JSON.stringify(plan));
-            if (typeof showPointToast === 'function') {
-                showPointToast(0, "تم إنشاء خطة الختمة! سيتم متابعة تقدمك.");
-            } else {
-                alert("تم إنشاء خطة الختمة!");
-            }
-        }
+        showKhatmahPlanModal();
     }
 }
 

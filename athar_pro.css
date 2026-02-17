@@ -223,14 +223,19 @@
 
 /* 5. Mushaf Themes */
 #readingDetailView.theme-classic {
-    background-color: #f4ecd8 !important;
-    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
-    background-size: 20px 20px;
-    color: #2c1810 !important;
+    background: transparent !important;
+    color: #ffffff !important;
 }
 
 #readingDetailView.theme-classic .verse-text {
-    color: #2c1810 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#readingDetailView.theme-classic .verse-num-badge {
+    border-color: #fbbf24;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
 }
 
 #readingDetailView.theme-night-gold {

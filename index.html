@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="ar">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>أثـر | Athar</title>
+    <title>أثـر | قرآن كريم، أذكار، ومرافقك الديني الذكي</title>
+    <meta name="description"
+        content="تطبيق أثـر - تجربة قرآنية فريدة مع تلاوات خاشعة، أذكار المسلم، ومتابعة الورد اليومي (ختمة) بتصميم عصري وجذاب.">
+    <meta name="keywords" content="قرآن كريم، أذكار، ختمة، صلاة، أثر، إسلامي، تطبيق ديني">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://athar-tau.vercel.app/">
+    <meta property="og:title" content="أثـر | قرآن كريم، أذكار، ومرافقك الديني الذكي">
+    <meta property="og:description"
+        content="مرافقك الديني الذكي لقراءة القرآن الكريم والأذكار وتتبع ختمتك اليومية بتصميم عصري وفريد.">
+    <meta property="og:image" content="https://athar-tau.vercel.app/favicon.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="أثـر | Athar">
+    <meta name="twitter:description" content="تجربة إسلامية متكاملة للقرآن الكريم والأذكار.">
+    <meta name="twitter:image" content="https://athar-tau.vercel.app/favicon.png">
+
+    <!-- Schema.org for Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "أثـر | Athar",
+      "alternateName": "Athar App",
+      "url": "https://athar-tau.vercel.app/",
+      "description": "تطبيق إسلامي شامل للقرآن الكريم والأذكار ومواقيت الصلاة",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://athar-tau.vercel.app/#readingPage?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "hasPart": [
+        { "@type": "WebPage", "name": "القرآن الكريم", "url": "https://athar-tau.vercel.app/#readingPage" },
+        { "@type": "WebPage", "name": "الأذكار", "url": "https://athar-tau.vercel.app/#adhkarPage" },
+        { "@type": "WebPage", "name": "مواقيت الصلاة", "url": "https://athar-tau.vercel.app/#prayerPage" }
+      ]
+    }
+    </script>
+
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#380056">
@@ -521,23 +561,7 @@
                 </div>
             </header>
 
-            <!-- Khatmah Settings Modal (Overlay) -->
-            <div id="khatmahModal" class="khatmah-modal" style="display: none;">
-                <div class="khatmah-modal-content">
-                    <h3>حدد مدة الختمة</h3>
-                    <div class="khatmah-options">
-                        <button class="khatmah-opt" data-days="7">7 أيام (أسبوعية)</button>
-                        <button class="khatmah-opt" data-days="15">15 يوماً</button>
-                        <button class="khatmah-opt" data-days="30">30 يوماً (شهرية)</button>
-                        <button class="khatmah-opt" data-days="60">60 يوماً</button>
-                    </div>
-                    <div class="custom-khatmah">
-                        <input type="number" id="customDaysInput" placeholder="أيام مخصصة..." min="1" max="1000">
-                        <button id="setCustomKhatmahBtn">تأكيد</button>
-                    </div>
-                    <button id="closeKhatmahModal" class="close-modal-btn">إغلاق</button>
-                </div>
-            </div>
+            <!-- Khatmah Settings Modal (Overlay) was moved to footer for global access -->
 
             <div class="reading-settings-bar">
                 <div class="font-controls">
@@ -545,14 +569,7 @@
                     <span id="fontSizeDisplay">100%</span>
                     <button id="increaseFont" title="تكبير الخط"><i class="fas fa-plus"></i></button>
                 </div>
-                <div class="theme-controls pro-themes">
-                    <button class="theme-opt mushaf-classic" onclick="AtharPro.setMushafTheme('classic')"
-                        title="مصحف كلاسيكي"></button>
-                    <button class="theme-opt mushaf-night" onclick="AtharPro.setMushafTheme('night-gold')"
-                        title="ليلي ذهبي"></button>
-                    <button class="theme-opt mushaf-forest" onclick="AtharPro.setMushafTheme('forest')"
-                        title="أخضر مريح"></button>
-                </div>
+                <!-- Theme controls removed as requested -->
                 <button class="focus-mode-btn" onclick="AtharPro.toggleFocusMode()" title="وضع الخشوع">
                     <i class="fas fa-eye-slash"></i>
                 </button>
@@ -1160,6 +1177,24 @@
                     إغلاق
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Khatmah Settings Modal (Overlay) - Placed outside pages for global visibility -->
+    <div id="khatmahModal" class="khatmah-modal" style="display: none;">
+        <div class="khatmah-modal-content">
+            <h3>حدد مدة الختمة</h3>
+            <div class="khatmah-options">
+                <button class="khatmah-opt" data-days="7">7 أيام (أسبوعية)</button>
+                <button class="khatmah-opt" data-days="15">15 يوماً</button>
+                <button class="khatmah-opt" data-days="30">30 يوماً (شهرية)</button>
+                <button class="khatmah-opt" data-days="60">60 يوماً</button>
+            </div>
+            <div class="custom-khatmah">
+                <input type="number" id="customDaysInput" placeholder="أيام مخصصة..." min="1" max="1000">
+                <button id="setCustomKhatmahBtn">تأكيد</button>
+            </div>
+            <button id="closeKhatmahModal" class="close-modal-btn">إغلاق</button>
         </div>
     </div>
 

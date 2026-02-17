@@ -99,27 +99,58 @@ async function handleRangeRequest(request, cachedResponse) {
 }
 
 // Handle messages from the main thread
+const downloadQueue = [];
+let isDownloading = false;
+
 self.addEventListener('message', (event) => {
   if (event.data.action === 'download') {
     const url = event.data.url;
-    event.waitUntil(
-      caches.open(MEDIA_CACHE).then((cache) => {
-        return fetch(url).then((response) => {
-          if (response.ok) {
-            cache.put(url, response);
-            // Notify UI that download is complete
-            self.clients.matchAll().then(clients => {
-              clients.forEach(client => client.postMessage({ action: 'download-complete', url: url }));
-            });
-          }
-        });
-      })
-    );
+    downloadQueue.push(url);
+    processDownloadQueue();
   } else if (event.data.action === 'show-notification') {
     const { title, options } = event.data;
     self.registration.showNotification(title, options);
   }
 });
+
+async function processDownloadQueue() {
+  if (isDownloading || downloadQueue.length === 0) return;
+
+  isDownloading = true;
+  const url = downloadQueue.shift();
+
+  try {
+    const cache = await caches.open(MEDIA_CACHE);
+    const existing = await cache.match(url);
+
+    if (!existing) {
+      // Use no-cors for opaque responses (cross-origin without CORS headers)
+      // This is critical for Archive.org links if they don't support CORS fully
+      const response = await fetch(url, { mode: 'no-cors' });
+      if (response.type === 'opaque' || response.ok) {
+        await cache.put(url, response);
+        notifyClients('download-complete', url);
+      } else {
+        console.error(`Download failed for ${url}: Status ${response.status}`);
+        notifyClients('download-failed', url);
+      }
+    } else {
+      notifyClients('download-complete', url); // Already cached
+    }
+  } catch (error) {
+    console.error(`Error downloading ${url}:`, error);
+    notifyClients('download-failed', url);
+  }
+
+  isDownloading = false;
+  processDownloadQueue(); // Process next item
+}
+
+function notifyClients(action, url) {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => client.postMessage({ action: action, url: url }));
+  });
+}
 
 // Notification Click Event
 self.addEventListener('notificationclick', (event) => {
