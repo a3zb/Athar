@@ -20,6 +20,9 @@ const HADITH_NAMES = {
     ibnmajah: 'سنن ابن ماجه'
 };
 
+// --- Optimization: In-Memory Cache ---
+const cachedBooks = {};
+
 let currentHadithBook = 'nawawi';
 let allHadiths = [];
 let filteredHadiths = [];
@@ -57,9 +60,8 @@ function buildHadithRegex(term) {
     return new RegExp(`(${pattern})`, 'gi');
 }
 
-async function setupHadithFeature() {
+function setupHadithFeature() {
     const navHadith = document.getElementById('navHadith');
-    const hadithSearchInput = document.getElementById('hadithSearchInput');
     const catBtns = document.querySelectorAll('.hadith-cat-btn');
     const toggleChaptersBtn = document.getElementById('toggleChaptersBtn');
 
@@ -137,6 +139,28 @@ async function setupHadithFeature() {
             }, 300);
         });
     }
+
+    // Start background pre-caching for large books to speed up future clicks
+    setTimeout(preCacheMajorHadithBooks, 10000);
+}
+
+/**
+ * Pre-cache Bukhari and Muslim in the background when app is idle
+ */
+async function preCacheMajorHadithBooks() {
+    const books = ['bukhari', 'muslim'];
+    for (const key of books) {
+        if (!cachedBooks[key]) {
+            console.log(`🌙 Background pre-parsing: ${key}`);
+            try {
+                const response = await fetch(HADITH_BOOKS[key].remote);
+                if (response.ok) {
+                    const data = await response.json();
+                    cachedBooks[key] = data.hadiths || data.data || (Array.isArray(data) ? data : null);
+                }
+            } catch (e) { /* silent fail in background */ }
+        }
+    }
 }
 
 function applyHadithFilters() {
@@ -191,10 +215,18 @@ async function loadHadiths(bookKey) {
         toggleChaptersBtn.querySelector('span').innerText = 'تصفح الأبواب';
     }
 
+    // --- Optimization: Check Memory Cache First ---
+    if (cachedBooks[bookKey]) {
+        allHadiths = cachedBooks[bookKey];
+        processLoadedBook(bookKey);
+        return;
+    }
+
     hadithList.innerHTML = `
         <div class="hadith-loading">
             <div class="spinner"></div>
             <p>جاري تحميل كتاب (${HADITH_NAMES[bookKey]})...</p>
+            <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">سيتم الحفظ في الذاكرة لتسريع الفتح لاحقاً</p>
         </div>
     `;
 
@@ -202,57 +234,72 @@ async function loadHadiths(bookKey) {
         const bookInfo = HADITH_BOOKS[bookKey];
         let fetchedData = null;
 
-        // Try local cache/file first for all books (if original folder exists, though it might not)
-        try {
-            const localResp = await fetch(`originals/${bookInfo.local}`);
-            if (localResp.ok) {
-                const text = await localResp.text();
-                fetchedData = parseHadithTxt(text);
-            }
-        } catch (e) { /* ignore and move to remote */ }
+        // Try fetch normally
+        let response = await fetch(bookInfo.remote);
 
-        // If no local data, fetch from remote
-        if (!fetchedData) {
-            const response = await fetch(bookInfo.remote);
-            if (response.ok) {
-                const data = await response.json();
-                // API can return { hadiths: [...] } or { data: [...] } or just [...]
-                fetchedData = data.hadiths || data.data || (Array.isArray(data) ? data : null);
-            }
+        // If we get an opaque response (status 0) from cache, it's unreadable. 
+        // We must retry with a cache-buster to force a fresh network fetch.
+        if (response.status === 0 || !response.ok) {
+            console.warn(`Hadith API returned status ${response.status}. Retrying with cache-buster...`);
+            response = await fetch(`${bookInfo.remote}?v=${Date.now()}`);
         }
 
-        if (!fetchedData) throw new Error("No data found");
+        if (response.ok) {
+            const data = await response.json();
+            fetchedData = data.hadiths || data.data || (Array.isArray(data) ? data : null);
+        }
 
+        if (!fetchedData) throw new Error("Could not parse hadith data structure");
+
+        // Save to cache
+        cachedBooks[bookKey] = fetchedData;
         allHadiths = fetchedData;
-        currentChapterRange = null;
+        processLoadedBook(bookKey);
 
-        const total = allHadiths.length;
-        const bookName = HADITH_NAMES[bookKey];
-
-        const existingBadge = document.getElementById('hadithCountBadge');
-        if (existingBadge) existingBadge.remove();
-        hadithList.insertAdjacentHTML('beforebegin', `<div id="hadithCountBadge" style="text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 15px;">تم تحميل ${total} حديث من ${bookName}</div>`);
-
-        // Update Chapters UI
-        const chaptersMap = {
-            bukhari: window.BUKHARI_CHAPTERS,
-            muslim: window.MUSLIM_CHAPTERS,
-            abudawud: window.ABUDAWUD_CHAPTERS,
-            tirmidhi: window.TIRMIDHI_CHAPTERS,
-            nasai: window.NASAI_CHAPTERS,
-            ibnmajah: window.IBNMAJAH_CHAPTERS
-        };
-
-        if (chaptersMap[bookKey]) {
-            renderChapters(chaptersMap[bookKey]);
-            chaptersSection.style.display = 'block';
-        }
-
-        applyHadithFilters();
     } catch (error) {
         console.error("Hadith loading error:", error);
-        hadithList.innerHTML = `<div class="error-msg"><p>حدث خطأ أثناء تحميل الأحاديث. يرجى التأكد من الاتصال بالإنترنت.</p></div>`;
+        hadithList.innerHTML = `
+            <div class="error-msg" style="text-align:center; padding:20px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:2rem; color:#ef4444; margin-bottom:10px;"></i>
+                <p>حدث خطأ أثناء تحميل الأحاديث.</p>
+                <p style="font-size:0.8rem; opacity:0.7;">يرجى التأكد من الاتصال بالإنترنت أو إعادة محاولة فتح الكتاب.</p>
+                <button onclick="loadHadiths('${bookKey}')" class="load-more-btn" style="margin-top:15px; background:#a855f7;">إعادة المحاولة</button>
+            </div>
+        `;
     }
+}
+
+/**
+ * Handle UI updates after a book is loaded (from cache or remote)
+ */
+function processLoadedBook(bookKey) {
+    const hadithList = document.getElementById('hadithList');
+    const chaptersSection = document.getElementById('hadithChaptersSection');
+
+    currentChapterRange = null;
+    const total = allHadiths.length;
+    const bookName = HADITH_NAMES[bookKey];
+
+    const existingBadge = document.getElementById('hadithCountBadge');
+    if (existingBadge) existingBadge.remove();
+    hadithList.insertAdjacentHTML('beforebegin', `<div id="hadithCountBadge" style="text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 15px;">تم تحميل ${total.toLocaleString()} حديث من ${bookName}</div>`);
+
+    // Update Chapters UI
+    const chaptersMap = {
+        bukhari: window.BUKHARI_CHAPTERS,
+        muslim: window.MUSLIM_CHAPTERS,
+        abudawud: window.ABUDAWUD_CHAPTERS,
+        tirmidhi: window.TIRMIDHI_CHAPTERS,
+        nasai: window.NASAI_CHAPTERS,
+        ibnmajah: window.IBNMAJAH_CHAPTERS
+    };
+
+    if (chaptersMap[bookKey]) {
+        renderChapters(chaptersMap[bookKey]);
+        chaptersSection.style.display = 'block';
+    }
+
+    applyHadithFilters();
 }
 
 function renderChapters(chapters) {
@@ -295,34 +342,13 @@ function renderChapters(chapters) {
     });
 }
 
-// Remove old filterByRange as it's replaced by applyHadithFilters
-
-function parseHadithTxt(text) {
-    const lines = text.split('\n');
-    const hadiths = [];
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed === '{' || trimmed.startsWith('{"name"')) break; // End of list, metadata starts
-
-        const pipeIndex = line.indexOf('|');
-        if (pipeIndex !== -1) {
-            const num = line.substring(0, pipeIndex).trim();
-            const content = line.substring(pipeIndex + 1).trim();
-            if (content) {
-                hadiths.push({ hadith: content, hadithnumber: num });
-            }
-        }
-    }
-    return hadiths;
-}
-
 function renderHadiths(hadiths, append = false) {
     const hadithList = document.getElementById('hadithList');
 
     if (!append) {
         hadithList.innerHTML = '';
+        hadithList.scrollTop = 0;
     } else {
-        // Remove the existing load more button if appending
         const oldBtn = document.querySelector('.load-more-btn-container');
         if (oldBtn) oldBtn.remove();
     }
@@ -385,7 +411,7 @@ function renderHadiths(hadiths, append = false) {
 
         const loadMoreBtn = document.createElement('button');
         loadMoreBtn.className = 'load-more-btn';
-        loadMoreBtn.innerHTML = `<i class="fas fa-plus"></i> عرض المزيد من الأحاديث (${hadiths.length - displayedCount} متبقية)`;
+        loadMoreBtn.innerHTML = `<i class="fas fa-plus"></i> عرض المزيد من الأحاديث (${(hadiths.length - displayedCount).toLocaleString()} متبقية)`;
         loadMoreBtn.onclick = () => {
             displayedCount += PAGE_SIZE;
             renderHadiths(hadiths, true);

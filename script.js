@@ -226,8 +226,8 @@ async function preCacheOfflineContent() {
         await Promise.allSettled(batch.map(async url => {
             const cached = await isUrlCached(url);
             if (!cached) {
-                // Fetch and let Service Worker store it
-                return fetch(url, { mode: 'no-cors' }).catch(() => { });
+                // Fetch normally (JSDelivr supports CORS) to ensure valid responses are cached
+                return fetch(url).catch(() => { });
             }
         }));
         // Small delay to prevent network saturation
