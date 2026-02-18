@@ -226,7 +226,7 @@ async function loadHadiths(bookKey) {
         <div class="hadith-loading">
             <div class="spinner"></div>
             <p>جاري تحميل كتاب (${HADITH_NAMES[bookKey]})...</p>
-            <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">سيتم الحفظ في الذاكرة لتسريع الفتح لاحقاً</p>
+            <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">سيتم التحميل من عدة مصادر لضمان السرعة...</p>
         </div>
     `;
 
@@ -234,22 +234,35 @@ async function loadHadiths(bookKey) {
         const bookInfo = HADITH_BOOKS[bookKey];
         let fetchedData = null;
 
-        // Try fetch normally
-        let response = await fetch(bookInfo.remote);
+        /**
+         * Robust Multi-Source Fetch (Fallback System)
+         */
+        const sources = [
+            bookInfo.remote, // Primary (JSDelivr)
+            bookInfo.remote.replace('cdn.jsdelivr.net', 'fastly.jsdelivr.net'), // Mirror 1
+            bookInfo.remote.replace('cdn.jsdelivr.net', 'gcore.jsdelivr.net'),  // Mirror 2
+            `https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/${bookInfo.local.replace('.txt', '.json')}` // Source (GitHub)
+        ];
 
-        // If we get an opaque response (status 0) from cache, it's unreadable. 
-        // We must retry with a cache-buster to force a fresh network fetch.
-        if (response.status === 0 || !response.ok) {
-            console.warn(`Hadith API returned status ${response.status}. Retrying with cache-buster...`);
-            response = await fetch(`${bookInfo.remote}?v=${Date.now()}`);
+        for (const url of sources) {
+            try {
+                console.log(`📡 Trying source: ${url}`);
+                const response = await fetch(url + (url.includes('?') ? '&' : '?') + `v=${Date.now()}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    fetchedData = data.hadiths || data.data || (Array.isArray(data) ? data : null);
+                    if (fetchedData) {
+                        console.log(`✅ Success from: ${url}`);
+                        break; // Exit loop on success
+                    }
+                }
+            } catch (e) {
+                console.warn(`❌ Failed to fetch from ${url}:`, e);
+            }
         }
 
-        if (response.ok) {
-            const data = await response.json();
-            fetchedData = data.hadiths || data.data || (Array.isArray(data) ? data : null);
-        }
-
-        if (!fetchedData) throw new Error("Could not parse hadith data structure");
+        if (!fetchedData) throw new Error("All sources failed to load hadith data");
 
         // Save to cache
         cachedBooks[bookKey] = fetchedData;
@@ -257,13 +270,16 @@ async function loadHadiths(bookKey) {
         processLoadedBook(bookKey);
 
     } catch (error) {
-        console.error("Hadith loading error:", error);
+        console.error("Final Hadith loading error:", error);
         hadithList.innerHTML = `
-            <div class="error-msg" style="text-align:center; padding:20px;">
-                <i class="fas fa-exclamation-triangle" style="font-size:2rem; color:#ef4444; margin-bottom:10px;"></i>
-                <p>حدث خطأ أثناء تحميل الأحاديث.</p>
-                <p style="font-size:0.8rem; opacity:0.7;">يرجى التأكد من الاتصال بالإنترنت أو إعادة محاولة فتح الكتاب.</p>
-                <button onclick="loadHadiths('${bookKey}')" class="load-more-btn" style="margin-top:15px; background:#a855f7;">إعادة المحاولة</button>
+            <div class="error-msg" style="text-align:center; padding:20px; background: rgba(239, 68, 68, 0.1); border-radius: 15px;">
+                <i class="fas fa-wifi-slash" style="font-size:2.5rem; color:#ef4444; margin-bottom:15px; display:block;"></i>
+                <h3 style="margin-bottom:10px;">عذراً، تعذر التحميل</h3>
+                <p style="font-size:0.9rem; opacity:0.8; margin-bottom:20px;">يبدو أن هناك مشكلة مؤقتة في سيرفرات الأحاديث العالمية.</p>
+                <button onclick="location.reload()" class="load-more-btn" style="background:#a855f7; border:none; padding:10px 25px; cursor:pointer;">
+                    تحديث الصفحة بالكامل
+                </button>
+                <p style="font-size:0.75rem; opacity:0.6; margin-top:15px;">إذا لم ينجح التحديث، يرجى المحاولة بعد قليل.</p>
             </div>
         `;
     }
