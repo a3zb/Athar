@@ -67,8 +67,42 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker Registered'))
+                    .then(reg => {
+                        console.log('Service Worker Registered');
+
+                        // Check for updates on load
+                        if (reg.waiting) {
+                            showUpdateBanner();
+                        }
+
+                        // Listen for new worker installing
+                        reg.onupdatefound = () => {
+                            const newWorker = reg.installing;
+                            newWorker.onstatechange = () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateBanner();
+                                }
+                            };
+                        };
+                    })
                     .catch(err => console.log('Service Worker Registration Failed', err));
+            });
+
+            // Handle the actual update button click
+            function showUpdateBanner() {
+                const banner = document.getElementById('updateBanner');
+                const btn = document.getElementById('updateNowBtn');
+                if (banner && btn) {
+                    banner.style.display = 'flex';
+                    btn.onclick = () => {
+                        window.location.reload();
+                    };
+                }
+            }
+
+            // Refresh all tabs when the new service worker takes over
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                // Not strictly necessary if we reload on button click, but good for sync
             });
         }
     </script>
@@ -1035,11 +1069,11 @@
                         <i class="fab fa-telegram"></i>
                         <span>Telegram</span>
                     </a>
-                    <a href="https://wa.me/213775525723" target="_blank" class="social-link whatsapp">
+                    <a href="https://wa.me/qr/64MMVGAQFZQRL1" target="_blank" class="social-link whatsapp">
                         <i class="fab fa-whatsapp"></i>
                         <span>WhatsApp</span>
                     </a>
-                    <a href="mailto:admin@athar-app.com" class="social-link email">
+                    <a href="mailto:athar.app@gmail.com" class="social-link email">
                         <i class="fas fa-envelope"></i>
                         <span>Email</span>
                     </a>
@@ -1052,7 +1086,7 @@
                         <i class="fab fa-youtube"></i>
                         <span>YouTube</span>
                     </a>
-                    <a href="https://www.tiktok.com/@qx.pd.7x" target="_blank" class="social-link tiktok">
+                    <a href="https://www.tiktok.com/@q.xpd" target="_blank" class="social-link tiktok">
                         <i class="fab fa-tiktok"></i>
                         <span>TikTok</span>
                     </a>
@@ -1196,6 +1230,18 @@
             </div>
             <button id="closeKhatmahModal" class="close-modal-btn">إغلاق</button>
         </div>
+    </div>
+
+    <!-- Custom Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Update Notification Banner -->
+    <div id="updateBanner" class="update-banner" style="display: none;">
+        <div class="update-content">
+            <i class="fas fa-sparkles"></i>
+            <span>تحديث جديد متوفر للإصدار الأخير من أثـر</span>
+        </div>
+        <button id="updateNowBtn" class="update-btn">تحديث الآن</button>
     </div>
 
     <script src="data.js"></script>
